@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0e0e0f">
   <meta name="referrer" content="no-referrer">
+  <meta name="google-sync-client-id" content="758564020397-k0bparvcp75iv5f1dg6741j120cr2p9o.apps.googleusercontent.com">
   <title>링크 서랍</title>
   <meta name="description" content="링크를 붙여넣고 카테고리별로 정리하는 개인 보관함">
   <style>
@@ -113,6 +114,14 @@
     }
     .theme-button:hover { background: var(--hover); color: var(--ink); }
     .theme-symbol { width: 14px; font: 18px/1 system-ui, sans-serif; text-align: center; }
+    .sync-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 7px 12px; margin: -9px 0 17px; }
+    .sync-button {
+      padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px;
+      background: var(--card); color: var(--ink); font-size: 12px; font-weight: 700;
+    }
+    .sync-button:hover:not(:disabled) { background: var(--hover); }
+    .sync-button:disabled { opacity: .7; cursor: wait; }
+    #sync-status { color: var(--muted); font-size: 11px; }
     .capture {
       border-radius: 17px; background: linear-gradient(130deg, var(--card-top), var(--card) 62%);
       border: 1px solid var(--line); padding: 22px; box-shadow: var(--shadow);
@@ -257,6 +266,11 @@
         </div>
       </header>
 
+      <div class="sync-strip" id="sync-controls" hidden>
+        <button class="sync-button" id="drive-sync" type="button">Google Drive 연결</button>
+        <span id="sync-status" role="status" aria-live="polite"></span>
+      </div>
+
       <section class="capture" aria-labelledby="capture-title">
         <h2 id="capture-title">새 링크 저장</h2>
         <form id="capture-form">
@@ -333,8 +347,8 @@
     </form>
   </dialog>
 
-  <script>
-    "use strict";
+  <script type="module">
+    import { createDriveSync } from "./drive-sync.js";
 
     const categories = new Map([
       ["쿠파스", "#8bc48f"],
@@ -363,10 +377,11 @@
       }
     }
 
-    function save(next) {
+    function save(next, fromDrive = false) {
       try {
         localStorage.setItem(storeKey, JSON.stringify(next));
         model = next;
+        if (!fromDrive) driveSync.queue();
         return true;
       } catch {
         feedback("브라우저 저장 공간을 사용할 수 없어요. 저장되지 않았습니다.", true);
@@ -682,6 +697,33 @@
     });
 
     if (loadFailed) feedback("이 브라우저에 저장된 링크를 읽지 못했어요.", true);
+    const syncClient = document.querySelector('meta[name="google-sync-client-id"]').content;
+    const driveSync = createDriveSync({
+      clientId: syncClient,
+      read: readStore,
+      apply(next) {
+        if (loadFailed || !save(next, true)) return false;
+        render();
+        return true;
+      },
+      show(state, message) {
+        const button = $("drive-sync");
+        button.disabled = state === "working";
+        button.textContent = state === "connected" ? "지금 동기화" :
+          state === "working" ? "동기화 중" : state === "retry" || state === "reconnect" ?
+          "다시 연결 / 동기화" : "Google Drive 연결";
+        $("sync-status").textContent = message;
+      },
+    });
+    if (syncClient && !loadFailed) {
+      const googleScript = document.createElement("script");
+      googleScript.src = "https://accounts.google.com/gsi/client";
+      googleScript.async = true;
+      document.head.append(googleScript);
+      $("sync-controls").hidden = false;
+      $("drive-sync").addEventListener("click", driveSync.connectOrSync);
+      driveSync.start();
+    }
     renderTheme();
     render();
   </script>
