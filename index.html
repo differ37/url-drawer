@@ -569,7 +569,7 @@
         (active === "전체" || entry.category === active) &&
         (!query || [entry.url, entry.memo, entry.category, entry.productUrl ?? ""]
           .some((value) => value.toLowerCase().includes(query)))
-      );
+      ).sort((a, b) => b.number - a.number || a.category.localeCompare(b.category, "ko") || a.id.localeCompare(b.id));
       $("total").textContent = "총 " + model.links.length + "개";
       $("library-title").textContent = active + (active === "전체" ? " 링크" : " 보관함");
       $("rows").replaceChildren(...entries.map(renderRow));
