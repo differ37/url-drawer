@@ -348,7 +348,7 @@
   </dialog>
 
   <script type="module">
-    import { createDriveSync } from "./drive-sync.js";
+    import { createDriveSync } from "./drive-sync.js?v=2";
 
     const categories = new Map([
       ["쿠파스", "#8bc48f"],
@@ -709,9 +709,8 @@
       show(state, message) {
         const button = $("drive-sync");
         button.disabled = state === "working";
-        button.textContent = state === "connected" ? "지금 동기화" :
-          state === "working" ? "동기화 중" : state === "retry" || state === "reconnect" ?
-          "다시 연결 / 동기화" : "Google Drive 연결";
+        button.textContent = state === "working" ? "동기화 중" :
+          model.driveSync?.account ? "동기화" : "Google Drive 연결";
         $("sync-status").textContent = message;
       },
     });
