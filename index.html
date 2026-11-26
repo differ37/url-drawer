@@ -1,154 +1,232 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#182c26">
+  <meta name="theme-color" content="#0e0e0f">
   <meta name="referrer" content="no-referrer">
   <title>링크 서랍</title>
   <meta name="description" content="링크를 붙여넣고 카테고리별로 정리하는 개인 보관함">
   <style>
+    @font-face {
+      font-family: Paperlogy;
+      src: url("https://cdn.jsdelivr.net/gh/Freesentation/paperlogy@8ef35f53b318c7ca914c52b1b382b9a8bad07a61/woff2/Paperlogy-4Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: Paperlogy;
+      src: url("https://cdn.jsdelivr.net/gh/Freesentation/paperlogy@8ef35f53b318c7ca914c52b1b382b9a8bad07a61/woff2/Paperlogy-7Bold.woff2") format("woff2");
+      font-weight: 700;
+      font-display: swap;
+    }
+
     :root {
+      color-scheme: dark;
+      --canvas: #0e0e0f;
+      --rail: #121213;
+      --card: #181819;
+      --card-top: #1f1f21;
+      --input: #111112;
+      --line: #303033;
+      --fine-line: #262628;
+      --ink: #f4f4f3;
+      --muted: #a7a7ac;
+      --hover: #262628;
+      --accent: #f2f2ef;
+      --on-accent: #151516;
+      --primary-hover: #dcdcd8;
+      --danger: #ffaca6;
+      --danger-bg: #392121;
+      --shadow: 0 18px 45px #0003;
+      font: 16px/1.55 Paperlogy, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    }
+
+    :root[data-theme="light"] {
       color-scheme: light;
-      --ink: #20342d;
-      --muted: #56665f;
-      --green: #205f4c;
-      --line: #dce4da;
-      --paper: #f5f6ef;
-      --white: #fffefa;
-      font: 16px/1.55 "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      --canvas: #fbfbfa;
+      --rail: #f4f4f3;
+      --card: #fff;
+      --card-top: #f8f8f7;
+      --input: #fff;
+      --line: #d9d9d8;
+      --fine-line: #e9e9e8;
+      --ink: #171718;
+      --muted: #58585d;
+      --hover: #ebebea;
+      --accent: #1a1a1c;
+      --on-accent: #fff;
+      --primary-hover: #37373a;
+      --danger: #a52b26;
+      --danger-bg: #faeeed;
+      --shadow: 0 18px 42px #2424240a;
     }
 
     * { box-sizing: border-box; }
-    body { margin: 0; min-width: 280px; background: var(--paper); color: var(--ink); }
+    body { margin: 0; min-width: 280px; background: var(--canvas); color: var(--ink); }
     button, input, select { font: inherit; }
     button { cursor: pointer; }
     button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
-      outline: 2px solid #bc711f;
+      outline: 2px solid var(--muted);
       outline-offset: 3px;
     }
 
-    .layout { min-height: 100vh; display: grid; grid-template-columns: 236px minmax(0, 1fr); }
-    .sidebar { background: #182c26; color: #f0f4e9; padding: 31px 23px; display: flex; flex-direction: column; }
-    .brand { display: flex; align-items: center; gap: 12px; margin: 0 0 43px; font-size: 21px; font-weight: 800; letter-spacing: -.05em; }
-    .brand-icon, .empty-icon { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 11px; }
-    .brand-icon { background: #cde7a9; color: #1d3529; }
-    .chain { position: relative; width: 23px; height: 22px; transform: rotate(-36deg); }
+    .layout { min-height: 100vh; display: grid; grid-template-columns: 222px minmax(0, 1fr); }
+    .sidebar {
+      background: var(--rail); border-right: 1px solid var(--fine-line);
+      padding: 28px 18px; display: flex; flex-direction: column;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin: 0 0 42px 6px; font-size: 19px; font-weight: 700; letter-spacing: -.04em; }
+    .brand-icon, .empty-icon { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 10px; }
+    .brand-icon { background: var(--accent); color: var(--on-accent); }
+    .chain { position: relative; width: 24px; height: 22px; transform: rotate(-36deg); }
     .chain::before, .chain::after {
       content: ""; position: absolute; top: 7px; width: 13px; height: 8px;
       border: 2px solid currentColor; border-radius: 6px;
     }
-    .chain::before { left: 0; }
-    .chain::after { right: 0; }
-    .nav-label { margin: 0 0 9px 10px; color: #b2c5ba; font-size: 12px; font-weight: 700; }
-    #categories { display: grid; gap: 4px; }
+    .chain::before { left: 1px; }
+    .chain::after { right: 1px; }
+    .nav-label { margin: 0 0 10px 11px; color: var(--muted); font-size: 11px; font-weight: 700; }
+    #categories { display: grid; gap: 5px; }
     .nav-button {
-      width: 100%; border: 0; border-radius: 8px; color: #e3eae0; background: transparent;
-      display: flex; align-items: center; gap: 10px; padding: 9px 10px; text-align: left;
-      font-size: 14px; white-space: nowrap;
+      width: 100%; border: 1px solid transparent; border-radius: 9px; color: var(--muted); background: transparent;
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px; text-align: left;
+      font-size: 13px; white-space: nowrap; min-height: 40px;
     }
-    .nav-button:hover { background: #273f36; }
-    .nav-button[aria-pressed="true"] { background: #d8eac5; color: #23392d; font-weight: 750; }
-    .nav-button .count { margin-inline-start: auto; opacity: .85; font-size: 12px; font-variant-numeric: tabular-nums; }
-    .dot { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--dot, #84ac95); }
-    .local-label { display: flex; gap: 8px; align-items: center; margin: auto 0 0; padding-top: 36px; color: #b2c5ba; font-size: 12px; }
+    .nav-button:hover { background: var(--hover); color: var(--ink); }
+    .nav-button[aria-pressed="true"] { background: var(--card-top); border-color: var(--line); color: var(--ink); font-weight: 700; }
+    .nav-button .count { margin-inline-start: auto; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--dot, var(--muted)); }
+    .local-label { display: flex; gap: 8px; align-items: center; margin: auto 6px 0; padding-top: 35px; color: var(--muted); font-size: 11px; }
 
-    main { width: min(100%, 1270px); padding: 49px clamp(24px, 5.2vw, 78px) 56px; }
+    main { width: min(100%, 1240px); padding: 38px clamp(22px, 4.6vw, 72px) 58px; }
     h1, h2, p { margin: 0; }
-    h1 { font-size: clamp(34px, 4.5vw, 52px); letter-spacing: -.068em; line-height: 1.13; }
+    h1 { font-size: clamp(33px, 4vw, 49px); letter-spacing: -.065em; line-height: 1.13; }
+    h2 { font-size: 19px; letter-spacing: -.04em; line-height: 1.25; }
     .overview { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 25px; }
-    .overview p { margin-top: 9px; color: var(--muted); font-size: 14px; }
-    .total { flex: none; color: var(--green); font-weight: 750; font-size: 13px; background: #e4edda; border-radius: 99px; padding: 6px 12px; }
-    .capture { border-radius: 17px; background: #e8efdd; border: 1px solid #d7e2cd; padding: 23px 23px 18px; }
-    h2 { font-size: 19px; letter-spacing: -.035em; line-height: 1.25; }
-    .capture-fields { display: grid; grid-template-columns: minmax(0, 1fr) 130px auto; align-items: end; gap: 10px; margin: 15px 0 10px; }
-    .field { display: grid; gap: 5px; min-width: 0; font-size: 12px; font-weight: 700; }
-    .field input, .field select, .search input {
-      width: 100%; border: 1px solid #cad7c6; border-radius: 9px; background: var(--white);
-      color: var(--ink); padding: 10px 12px; min-height: 44px; font-size: 14px; font-weight: 500;
+    .overview-tools { display: flex; align-items: center; gap: 9px; }
+    .total, .theme-button {
+      display: inline-flex; align-items: center; gap: 7px; flex: none; color: var(--muted);
+      background: var(--card); border: 1px solid var(--line); border-radius: 99px;
+      padding: 7px 11px; font-size: 12px; font-weight: 700; white-space: nowrap;
     }
-    .field input::placeholder, .search input::placeholder { color: #63746b; }
+    .theme-button:hover { background: var(--hover); color: var(--ink); }
+    .theme-symbol { width: 14px; font: 18px/1 system-ui, sans-serif; text-align: center; }
+    .capture {
+      border-radius: 17px; background: linear-gradient(130deg, var(--card-top), var(--card) 62%);
+      border: 1px solid var(--line); padding: 22px; box-shadow: var(--shadow);
+    }
+    .capture-fields {
+      display: grid; grid-template-columns: minmax(0, 1fr) 136px auto;
+      align-items: end; gap: 10px; margin: 17px 0 0;
+    }
+    .field { display: grid; gap: 6px; min-width: 0; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .field input, .field select, .search input {
+      width: 100%; border: 1px solid var(--line); border-radius: 9px; background: var(--input);
+      color: var(--ink); padding: 10px 12px; min-height: 43px; font-size: 14px; font-weight: 400;
+    }
+    .field input::placeholder, .search input::placeholder { color: var(--muted); }
+    .field input:disabled { opacity: .55; }
     .primary {
       display: inline-flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap;
-      min-height: 44px; padding: 9px 17px; border: 1px solid var(--green); border-radius: 9px;
-      color: white; background: var(--green); font-size: 14px; font-weight: 750;
+      min-height: 43px; padding: 9px 17px; border: 1px solid transparent; border-radius: 9px;
+      color: var(--on-accent); background: var(--accent); font-size: 14px; font-weight: 700;
     }
-    .primary:hover { background: #164837; }
-    .plus { font-size: 19px; font-weight: 500; line-height: 1; }
-    .capture-help { color: #4d6353; font-size: 12px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px 12px; }
-    .toggle { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; font-weight: 750; }
-    .toggle input { accent-color: var(--green); margin: 0; }
-    #feedback { min-height: 20px; margin: 6px 2px 0; color: var(--muted); font-size: 13px; }
-    #feedback.error { color: #9b3230; }
+    .primary:hover { background: var(--primary-hover); }
+    .plus { font: 19px/1 system-ui, sans-serif; }
+    .product-section { margin-top: 12px; }
+    .product-fields { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+    .product-none {
+      min-height: 43px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px;
+      color: var(--muted); background: var(--card); font-size: 12px; font-weight: 700; white-space: nowrap;
+    }
+    .product-none:hover { background: var(--hover); color: var(--ink); }
+    .product-none[aria-pressed="true"] { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+    .capture-help { margin-top: 15px; color: var(--muted); font-size: 11px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px 12px; }
+    .toggle { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; color: var(--ink); font-weight: 700; }
+    .toggle input { accent-color: var(--accent); margin: 0; }
+    #feedback { min-height: 20px; margin: 7px 2px 0; color: var(--muted); font-size: 12px; }
+    #feedback.error, #edit-feedback { color: var(--danger); }
 
-    .library { margin-top: 20px; }
-    .library-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
-    .search { position: relative; width: min(240px, 58%); }
-    .search input { padding-left: 34px; min-height: 39px; }
+    .library { margin-top: 17px; }
+    .library-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .search { position: relative; width: min(251px, 55%); }
+    .search input { padding-left: 34px; min-height: 38px; font-size: 12px; }
     .search::before {
-      content: ""; position: absolute; left: 13px; top: 12px; width: 10px; height: 10px;
+      content: ""; position: absolute; left: 13px; top: 11px; width: 9px; height: 9px;
       border: 1.5px solid var(--muted); border-radius: 50%; pointer-events: none;
     }
     .search::after {
-      content: ""; position: absolute; left: 22px; top: 23px; width: 6px; height: 1.5px;
+      content: ""; position: absolute; left: 22px; top: 21px; width: 6px; height: 1.5px;
       background: var(--muted); transform: rotate(45deg); pointer-events: none;
     }
-    .table-box { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--white); }
+    .table-box { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--card); }
     table { width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; }
     th, td { padding: 12px 13px; }
-    th { font-size: 12px; font-weight: 750; color: #52655a; background: #f1f4ed; }
-    td { border-top: 1px solid #edf0e9; vertical-align: middle; font-size: 14px; }
-    .col-number { width: 62px; }
-    .col-url { width: 36%; }
-    .col-category { width: 90px; }
-    .col-actions { width: 123px; }
-    .number { color: #53695d; font-size: 13px; font-variant-numeric: tabular-nums; }
-    .link { color: var(--green); font-weight: 750; text-decoration-thickness: 1px; text-underline-offset: 3px; overflow-wrap: anywhere; }
+    th { font-size: 12px; font-weight: 700; color: var(--muted); background: var(--card-top); }
+    td { border-top: 1px solid var(--fine-line); vertical-align: middle; font-size: 13px; }
+    .col-number { width: 61px; }
+    .col-url { width: 34%; }
+    .col-category { width: 91px; }
+    .col-actions { width: 110px; }
+    .number { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .link, .product-link { color: var(--ink); font-weight: 700; text-decoration-thickness: 1px; text-underline-offset: 3px; overflow-wrap: anywhere; }
     .url-detail { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .category-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 99px; background: #f0f3eb; font-size: 12px; white-space: nowrap; }
+    .product-link { display: inline-flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 11px; }
+    .product-link::after { content: "↗"; font: 12px/1 system-ui, sans-serif; }
+    .product-missing { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .category-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 99px; background: var(--card-top); font-size: 11px; white-space: nowrap; }
     .memo { overflow-wrap: anywhere; }
     .memo.placeholder { color: var(--muted); }
     .actions { display: flex; gap: 4px; justify-content: end; }
-    .quiet { padding: 5px 7px; background: transparent; color: #3c5548; border: 1px solid transparent; border-radius: 6px; font-size: 12px; white-space: nowrap; }
-    .quiet:hover { background: #edf2e8; }
-    .delete:hover { color: #9b3230; background: #faece9; }
-    .empty { text-align: center; border-top: 1px solid var(--line); padding: 44px 18px 49px; }
-    .empty-icon { margin: 0 auto 10px; width: 48px; height: 48px; background: #ecf2e4; color: #416852; }
-    .empty strong { display: block; font-size: 16px; }
-    .empty p { color: var(--muted); font-size: 13px; margin-top: 5px; }
+    .quiet { padding: 5px 7px; background: transparent; color: var(--muted); border: 1px solid transparent; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+    .quiet:hover { background: var(--hover); color: var(--ink); }
+    .delete:hover { color: var(--danger); background: var(--danger-bg); }
+    .empty { text-align: center; border-top: 1px solid var(--line); padding: 40px 18px 45px; }
+    .empty-icon { margin: 0 auto 11px; width: 46px; height: 46px; border: 1px solid var(--line); background: var(--card-top); color: var(--muted); }
+    .empty strong { display: block; font-size: 15px; }
+    .empty p { color: var(--muted); font-size: 12px; margin-top: 5px; }
     [hidden] { display: none !important; }
 
-    dialog { width: min(440px, calc(100% - 32px)); padding: 24px; border: 1px solid var(--line); border-radius: 15px; background: var(--white); color: var(--ink); }
-    dialog::backdrop { background: #152b2485; }
-    dialog .field { margin: 16px 0 20px; }
-    .dialog-actions { display: flex; gap: 10px; justify-content: end; align-items: center; }
+    dialog { width: min(480px, calc(100% - 32px)); padding: 23px; border: 1px solid var(--line); border-radius: 15px; background: var(--card); color: var(--ink); }
+    dialog::backdrop { background: #0009; }
+    dialog form > .field { margin-top: 16px; }
+    #edit-feedback { margin-top: 10px; font-size: 12px; }
+    #edit-feedback:empty { display: none; }
+    .dialog-actions { display: flex; gap: 10px; justify-content: end; align-items: center; margin-top: 18px; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); border: 0; }
 
     @media (max-width: 880px) {
-      .layout { grid-template-columns: 170px minmax(0, 1fr); }
-      .sidebar { padding-inline: 13px; }
-      main { padding-inline: 24px; }
+      .layout { grid-template-columns: 164px minmax(0, 1fr); }
+      .sidebar { padding-inline: 12px; }
+      main { padding-inline: 23px; }
       .col-url { width: 29%; }
-      .col-actions { width: 99px; }
-      th, td { padding-inline: 9px; }
+      .col-actions { width: 92px; }
+      th, td { padding-inline: 8px; }
     }
     @media (max-width: 650px) {
       .layout { display: block; }
-      .sidebar { padding: 15px 16px 9px; }
-      .brand { margin: 0 0 11px; font-size: 18px; }
+      .sidebar { padding: 14px 13px 8px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { margin: 0 0 10px 3px; font-size: 16px; }
       .brand-icon { width: 30px; height: 30px; }
       .nav-label, .local-label { display: none; }
       #categories { display: flex; overflow: auto; padding: 4px 3px 7px; }
-      .nav-button { width: auto; gap: 6px; padding: 7px 9px; font-size: 13px; }
-      main { padding: 23px 16px 30px; }
-      .capture { padding: 16px; }
+      .nav-button { width: auto; gap: 6px; min-height: 34px; padding: 6px 8px; font-size: 12px; }
+      main { padding: 21px 14px 30px; }
+      .overview { align-items: center; margin-bottom: 17px; }
+      h1 { font-size: clamp(25px, 6.4vw, 38px); white-space: nowrap; }
+      .overview-tools { gap: 5px; }
+      .total, .theme-button { padding: 6px 7px; font-size: 10px; }
+      .theme-symbol { width: 12px; font-size: 14px; }
+      .capture { padding: 15px; }
       .capture-fields { grid-template-columns: minmax(0, 1fr) auto; }
       .field-url { grid-column: 1 / -1; }
-      .capture-fields .primary { min-width: 100px; }
-      .empty { padding: 34px 12px; }
+      .capture-fields .primary { min-width: 86px; }
+      .empty { padding: 31px 12px; }
       table, tbody { display: block; }
       thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-      tbody tr { display: grid; grid-template-columns: 37px auto 1fr; gap: 5px 8px; padding: 12px; border-top: 1px solid var(--line); }
+      tbody tr { display: grid; grid-template-columns: 35px auto 1fr; gap: 6px 8px; padding: 11px; border-top: 1px solid var(--line); }
       tbody tr:first-child { border-top: 0; }
       td { border: 0; padding: 0; min-width: 0; }
       .number { grid-column: 1; grid-row: 1; align-self: center; }
@@ -169,11 +247,14 @@
     </aside>
     <main>
       <header class="overview">
-        <div>
-          <h1>링크 보관함</h1>
-          <p>링크를 모아두고, 필요할 때 다시 열어보세요.</p>
+        <h1>링크 보관함</h1>
+        <div class="overview-tools">
+          <span class="total" id="total">총 0개</span>
+          <button class="theme-button" id="theme-switch" type="button">
+            <span class="theme-symbol" id="theme-symbol" aria-hidden="true">☼</span>
+            <span id="theme-label">화이트</span>
+          </button>
         </div>
-        <span class="total" id="total">총 0개</span>
       </header>
 
       <section class="capture" aria-labelledby="capture-title">
@@ -187,6 +268,12 @@
               <select id="category"></select>
             </label>
             <button class="primary" type="submit"><span class="plus" aria-hidden="true">+</span> 저장</button>
+          </div>
+          <div class="product-section product-fields" id="capture-product" hidden>
+            <label class="field">쿠팡 상품 링크 (선택)
+              <input id="product-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="쿠팡 상품 주소 붙여넣기">
+            </label>
+            <button class="product-none" id="product-none" type="button" aria-pressed="false">없음</button>
           </div>
           <div class="capture-help">
             <label class="toggle"><input id="auto-summary" type="checkbox" checked> 한 줄 메모 자동 작성</label>
@@ -228,10 +315,17 @@
 
   <dialog id="edit-dialog" aria-labelledby="edit-title">
     <form id="edit-form">
-      <h2 id="edit-title">한 줄 메모 수정</h2>
+      <h2 id="edit-title">링크 정보 수정</h2>
       <label class="field">메모
         <input id="memo-text" maxlength="180" autocomplete="off" autofocus>
       </label>
+      <div class="product-section product-fields" id="edit-product" hidden>
+        <label class="field">쿠팡 상품 링크 (선택)
+          <input id="edit-product-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="쿠팡 상품 주소 붙여넣기">
+        </label>
+        <button class="product-none" id="edit-product-none" type="button" aria-pressed="false">없음</button>
+      </div>
+      <p id="edit-feedback" role="status" aria-live="polite"></p>
       <div class="dialog-actions">
         <button class="quiet" id="cancel-edit" type="button">취소</button>
         <button class="primary" type="submit">저장</button>
@@ -283,6 +377,29 @@
     function feedback(message, error = false) {
       $("feedback").textContent = message;
       $("feedback").classList.toggle("error", error);
+    }
+
+    function renderTheme() {
+      const light = model.theme === "light";
+      document.documentElement.dataset.theme = light ? "light" : "dark";
+      document.querySelector('meta[name="theme-color"]').content = light ? "#fbfbfa" : "#0e0e0f";
+      $("theme-symbol").textContent = light ? "☾" : "☼";
+      $("theme-label").textContent = light ? "다크" : "화이트";
+      $("theme-switch").setAttribute("aria-label", light ? "다크 테마로 전환" : "화이트 테마로 전환");
+    }
+
+    function setProductNone(input, button, absent) {
+      if (absent) input.value = "";
+      input.disabled = absent;
+      button.setAttribute("aria-pressed", absent);
+    }
+
+    function bindProductNone(input, button) {
+      button.addEventListener("click", () => {
+        const absent = !input.disabled;
+        setProductNone(input, button, absent);
+        if (!absent) input.focus();
+      });
     }
 
     function validUrl(text) {
@@ -381,6 +498,17 @@
       link.rel = "noopener noreferrer";
       link.title = entry.url;
       urlCell.append(link, make("span", "url-detail", entry.url));
+      const product = entry.category === "쿠파스" && entry.productUrl ? validUrl(entry.productUrl) : null;
+      if (product) {
+        const productLink = make("a", "product-link", "쿠팡 상품");
+        productLink.href = product.href;
+        productLink.target = "_blank";
+        productLink.rel = "noopener noreferrer";
+        productLink.title = product.href;
+        urlCell.append(productLink);
+      } else if (entry.category === "쿠파스" && entry.productUrl === null) {
+        urlCell.append(make("span", "product-missing", "쿠팡 상품 없음"));
+      }
 
       const category = make("td", "category-cell");
       const pill = make("span", "category-pill");
@@ -393,10 +521,14 @@
       const actions = make("div", "actions");
       const edit = make("button", "quiet", "수정");
       edit.type = "button";
-      edit.setAttribute("aria-label", entry.category + " " + entry.number + "번 메모 수정");
+      edit.setAttribute("aria-label", entry.category + " " + entry.number + "번 정보 수정");
       edit.addEventListener("click", () => {
-        editing = entry.id;
+        editing = { id: entry.id, memo: entry.memo };
         $("memo-text").value = entry.memo;
+        $("edit-product").hidden = entry.category !== "쿠파스";
+        $("edit-product-url").value = entry.productUrl ?? "";
+        setProductNone($("edit-product-url"), $("edit-product-none"), entry.productUrl === null);
+        $("edit-feedback").textContent = "";
         $("edit-dialog").showModal();
       });
       const remove = make("button", "quiet delete", "삭제");
@@ -420,7 +552,8 @@
       const query = $("search").value.trim().toLowerCase();
       const entries = model.links.filter((entry) =>
         (active === "전체" || entry.category === active) &&
-        (!query || [entry.url, entry.memo, entry.category].some((value) => value.toLowerCase().includes(query)))
+        (!query || [entry.url, entry.memo, entry.category, entry.productUrl ?? ""]
+          .some((value) => value.toLowerCase().includes(query)))
       );
       $("total").textContent = "총 " + model.links.length + "개";
       $("library-title").textContent = active + (active === "전체" ? " 링크" : " 보관함");
@@ -440,12 +573,24 @@
       button.addEventListener("click", () => {
         active = category;
         if (category !== "전체") $("category").value = category;
+        $("capture-product").hidden = $("category").value !== "쿠파스";
         render();
       });
       $("categories").append(button);
       if (category !== "전체") $("category").add(new Option(category, category));
     }
 
+    $("capture-product").hidden = $("category").value !== "쿠파스";
+    $("category").addEventListener("change", () => {
+      $("capture-product").hidden = $("category").value !== "쿠파스";
+    });
+    bindProductNone($("product-url"), $("product-none"));
+    bindProductNone($("edit-product-url"), $("edit-product-none"));
+    $("theme-switch").addEventListener("click", () => {
+      const current = readStore();
+      const theme = current.theme === "light" ? "dark" : "light";
+      if (save({ ...current, theme })) renderTheme();
+    });
     $("auto-summary").checked = model.autoSummary;
     $("auto-summary").addEventListener("change", () => {
       if (!save({ ...readStore(), autoSummary: $("auto-summary").checked })) $("auto-summary").checked = model.autoSummary;
@@ -460,6 +605,14 @@
         return;
       }
       const category = $("category").value;
+      const productInput = $("product-url");
+      const productText = category === "쿠파스" && !productInput.disabled ? productInput.value.trim() : "";
+      const productUrl = productText ? validUrl(productText) : null;
+      if (productText && !productUrl) {
+        feedback("쿠팡 상품 링크를 확인하거나 ‘없음’을 선택해 주세요.", true);
+        productInput.focus();
+        return;
+      }
       const current = readStore();
       if (loadFailed) {
         feedback("기존 저장 내용을 읽을 수 없어요. 브라우저 저장 설정을 확인해 주세요.", true);
@@ -472,12 +625,17 @@
       const number = (current.numbers[category] ?? 0) + 1;
       const id = crypto.randomUUID();
       const entry = { id, number, category, url: url.href, memo: "" };
+      if (category === "쿠파스") entry.productUrl = productUrl?.href ?? null;
       const next = { ...current, numbers: { ...current.numbers, [category]: number }, links: [entry, ...current.links] };
       if (!save(next)) return;
       const address = current.autoSummary ? lookupUrl(url) : null;
       if (address) pending.add(id);
       if (active !== "전체") active = category;
       $("url").value = "";
+      if (category === "쿠파스") {
+        productInput.value = "";
+        setProductNone(productInput, $("product-none"), false);
+      }
       $("search").value = "";
       feedback(category + " " + number + "번에 저장했어요.");
       render();
@@ -487,11 +645,28 @@
     $("edit-form").addEventListener("submit", (event) => {
       event.preventDefault();
       const current = readStore();
+      const entry = current.links.find((item) => item.id === editing?.id);
+      if (!entry) {
+        $("edit-dialog").close();
+        return;
+      }
       const memo = $("memo-text").value.trim();
-      const links = current.links.map((entry) => entry.id === editing ? { ...entry, memo, memoEdited: true } : entry);
+      const updated = memo !== editing.memo ? { ...entry, memo, memoEdited: true } : { ...entry };
+      if (entry.category === "쿠파스") {
+        const input = $("edit-product-url");
+        const text = input.disabled ? "" : input.value.trim();
+        const product = text ? validUrl(text) : null;
+        if (text && !product) {
+          $("edit-feedback").textContent = "쿠팡 상품 링크를 확인하거나 ‘없음’을 선택해 주세요.";
+          input.focus();
+          return;
+        }
+        updated.productUrl = product?.href ?? null;
+      }
+      const links = current.links.map((item) => item.id === entry.id ? updated : item);
       if (save({ ...current, links })) {
         $("edit-dialog").close();
-        feedback("메모를 저장했어요.");
+        feedback("수정 내용을 저장했어요.");
         render();
       }
     });
@@ -501,11 +676,13 @@
       if (event.key === storeKey || event.key === null) {
         model = readStore();
         $("auto-summary").checked = model.autoSummary;
+        renderTheme();
         render();
       }
     });
 
     if (loadFailed) feedback("이 브라우저에 저장된 링크를 읽지 못했어요.", true);
+    renderTheme();
     render();
   </script>
 </body>
