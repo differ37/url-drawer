@@ -216,7 +216,7 @@ export function createDriveSync({ clientId, read, apply, show }) {
   function showError(error) {
     if (error.status === 401) {
       token = "";
-      show("reconnect", "Google에 다시 연결하면 동기화를 이어갈 수 있어요.");
+      show("reconnect", "동기화를 누르면 Google 연결을 갱신해요.");
     } else if (error.status === 403) {
       show("retry", "Google Drive 권한을 확인하지 못했어요. 다시 연결해 주세요.");
       token = "";
@@ -229,7 +229,7 @@ export function createDriveSync({ clientId, read, apply, show }) {
     if (!token || busy) return;
     if (Date.now() >= expiresAt) {
       token = "";
-      show("reconnect", "Google에 다시 연결하면 동기화를 이어갈 수 있어요.");
+      show("reconnect", "동기화를 누르면 Google 연결을 갱신해요.");
       return;
     }
     busy = true;
@@ -260,7 +260,8 @@ export function createDriveSync({ clientId, read, apply, show }) {
       return;
     }
     try {
-      const { user } = await request(DRIVE + "/about?fields=user(permissionId)", {}, response.access_token);
+      const fields = new URLSearchParams({ fields: "user(permissionId,emailAddress)" });
+      const { user } = await request(DRIVE + "/about?" + fields, {}, response.access_token);
       const current = read();
       const existing = current.driveSync;
       if (!user?.permissionId) throw new Error("Missing Drive account");
@@ -269,8 +270,10 @@ export function createDriveSync({ clientId, read, apply, show }) {
         show("reconnect", "이전에 연결한 Google 계정으로 다시 연결해 주세요.");
         return;
       }
-      if (!existing && !apply({
-        ...current, driveSync: { account: user.permissionId, device: crypto.randomUUID(), baseline: [] },
+      const settings = existing ?? { account: user.permissionId, device: crypto.randomUUID(), baseline: [] };
+      const loginHint = user.emailAddress || settings.loginHint;
+      if ((!existing || loginHint !== existing.loginHint) && !apply({
+        ...current, driveSync: { ...settings, loginHint },
       })) throw new Error("Local save failed");
       token = response.access_token;
       expiresAt = Date.now() + Math.max(0, Number(response.expires_in) - 30) * 1000;
@@ -288,22 +291,26 @@ export function createDriveSync({ clientId, read, apply, show }) {
     }
     if (authorizing) return;
     if (!clientId || !window.google?.accounts?.oauth2) {
-      show("reconnect", "Google 연결을 불러오지 못했어요. 새로고침 후 다시 눌러 주세요.");
+      show("reconnect", "Google 연결을 불러오는 중이에요. 잠시 후 다시 눌러 주세요.");
       return;
     }
     try {
+      const settings = read().driveSync;
       authorizing = true;
+      show("working", "Google 연결을 확인하는 중…");
       const client = google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: DRIVE_SCOPE,
         include_granted_scopes: false,
+        prompt: settings?.account ? "" : "select_account",
+        ...(settings?.loginHint ? { login_hint: settings.loginHint } : {}),
         callback: authorize,
         error_callback: () => {
           authorizing = false;
           show("reconnect", "Google 연결 창이 닫혔어요. 다시 연결할 수 있어요.");
         },
       });
-      client.requestAccessToken({ prompt: "select_account" });
+      client.requestAccessToken();
     } catch {
       authorizing = false;
       show("reconnect", "Google 연결 창을 열지 못했어요. 다시 눌러 주세요.");
@@ -311,7 +318,11 @@ export function createDriveSync({ clientId, read, apply, show }) {
   }
 
   function start() {
-    show("idle", "링크를 Google Drive에 저장하고 같은 계정으로 두 기기에서 볼 수 있어요.");
+    if (read().driveSync?.account) {
+      show("ready", "동기화를 누르면 연결한 Google 계정에서 최신 목록을 불러와요.");
+    } else {
+      show("idle", "링크를 Google Drive에 저장하고 같은 계정으로 두 기기에서 볼 수 있어요.");
+    }
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden && token) void sync();
     });
